@@ -1,9 +1,10 @@
+import Main from "./components/Main/main"
 
 function App() {
 
   return (
     <>
-      <h1>OLX</h1>
+      <Main />
     </>
   )
 }
