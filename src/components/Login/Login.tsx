@@ -8,6 +8,7 @@ import { auth, googleProvider } from '../../firebase/firebase'
 type popProp = {
     setLoginPop: any
 }
+
 const Login = (props:popProp) => {
     
     const googleSignin = async() => {
