@@ -5,10 +5,12 @@ import arrow from '../../assets/arrow.png'
 import search from '../../assets/search.png'
 import Login from '../Login/Login'
 import { FaBars, FaTimes } from "react-icons/fa";
+import { Link } from 'react-router-dom'
 
 const Navbar = () => {
     const [loginPop , setLoginPop] = useState(false)
     const [menuOpen, setMenuOpen] = useState(false);
+  
   return (
     <>
     <div className="flex items-center justify-between bg-gray-200 shadow-md px-4 py-3 lg:px-6">
@@ -61,7 +63,12 @@ const Navbar = () => {
           <button onClick={() => setLoginPop(!loginPop)} className="mt-2 font-bold text-lg underline">
             Login
           </button>
-          <button className="mt-3 bg-yellow-300 p-3 rounded-full text-lg font-bold">+ SELL</button>
+          <Link
+            to="/sell"
+            className="mt-3 bg-yellow-300 p-3 rounded-full text-lg font-bold"
+          >
+            + SELL
+          </Link>
         </div>
       )}
 

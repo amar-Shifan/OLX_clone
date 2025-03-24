@@ -2,16 +2,20 @@ import React, { useState } from 'react'
 import { db } from '../../firebase/firebase'
 import { addDoc , collection , serverTimestamp } from 'firebase/firestore'
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { auth } from '../../firebase/firebase';
 
 const SellProduct = () => {
     const [ product , setProduct ] = useState({
         title: "",
-    description: "",
-    price: "",
-    category: "",
-    location: "",
-    imageUrl: ""
+        description: "",
+        price: "",
+        category: "",
+        location: "",
+        userId:"",
+        userName:"",
+        imageUrl: ""
     })
+
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [uploading, setUploading] = useState(false);
 
@@ -29,35 +33,46 @@ const SellProduct = () => {
         e.preventDefault()
         setUploading(true)
         try {
+            const user = auth.currentUser;
+            if (!user) {
+                alert("You must be logged in to sell a product!");
+                return;
+            }
+
             let imageUrl = "";
 
             if(imageFile) {
                 const storage = getStorage()
                 const storageRef = ref(storage , `products/${imageFile.name}`)
                 const uploadTask = uploadBytesResumable(storageRef , imageFile)
-                await new Promise<void>((res , rej) => {
+                await new Promise<void>((res, rej) => {
                     uploadTask.on(
-                        'state_changed',
-                        (error) => rej(error),
-                        async() => {
-                            imageUrl = await getDownloadURL(uploadTask.snapshot.ref)
-                            res();
-                        }
-                    )
-                })
+                      'state_changed',
+                      null, 
+                      (error) => rej(error),  
+                      async () => { 
+                        imageUrl = await getDownloadURL(uploadTask.snapshot.ref);
+                        res();
+                      }
+                    );
+                  });
+                  
             }
 
             await addDoc(collection(db , "products") , {
                 ...product ,
                 price: Number(product.price),
                 imageUrl,
+                userId:user.uid,
+                userName:user.displayName,
                 createdAt: serverTimestamp()
             })
+
             alert('product added successfully')
             setUploading(false)
         } catch (error) {
             console.log(error)
-            alert('error')
+            alert(error)
         }
     }
   return (

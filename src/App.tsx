@@ -1,4 +1,4 @@
-import Main from "./components/Main/main"
+import Home from "./components/Home/Home";
 import { Route , Routes } from "react-router-dom"
 import SellProduct from "./components/SellProduct/SellProduct"
 
@@ -8,7 +8,7 @@ function App() {
   return (
     <>
       <Routes>
-        <Route path="/" element={<Main />}/>
+        <Route path="/" element={<Home  />}/>
         <Route path="/sell" element={<SellProduct/>}/>
       </Routes>
     </>
