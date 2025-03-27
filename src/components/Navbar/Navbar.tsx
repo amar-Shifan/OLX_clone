@@ -5,16 +5,15 @@ import arrow from '../../assets/arrow.png'
 import search from '../../assets/search.png'
 import Login from '../Login/Login'
 import { FaBars, FaTimes } from "react-icons/fa";
-import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
 const Navbar = () => {
     const [loginPop , setLoginPop] = useState(false)
     const [menuOpen, setMenuOpen] = useState(false);
-  
+    const navigate = useNavigate()
   return (
     <>
-    <div className="flex items-center justify-between bg-gray-200 shadow-md px-4 py-3 lg:px-6">
-
+    <div className="flex items-center justify-between bg-slate-100 shadow-md px-4 py-3 lg:px-6">
         <img src={olx_logo} alt="OLX Logo" className="w-11 h-6" />
 
         <div className="hidden md:flex items-center bg-white border-2 border-blue-950 w-64 p-2 rounded-[4px] ml-5">
@@ -38,7 +37,7 @@ const Navbar = () => {
         </div>
 
         <div className="hidden md:flex bg-white items-center h-12 p-3 cursor-pointer rounded-full px-5 border-yellow-300 border-4">
-          <h1 className="font-bold text-lg">+ SELL</h1>
+          <h1 className="font-bold text-lg" onClick={() => navigate("/sell")}>+ SELL</h1>
         </div>
 
         <button className="md:hidden text-2xl" onClick={() => setMenuOpen(!menuOpen)}>
@@ -63,12 +62,12 @@ const Navbar = () => {
           <button onClick={() => setLoginPop(!loginPop)} className="mt-2 font-bold text-lg underline">
             Login
           </button>
-          <Link
-            to="/sell"
+          <button 
+            onClick={() => navigate("/sell")}
             className="mt-3 bg-yellow-300 p-3 rounded-full text-lg font-bold"
           >
             + SELL
-          </Link>
+          </button>
         </div>
       )}
 

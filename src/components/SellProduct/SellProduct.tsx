@@ -1,19 +1,17 @@
 import React, { useState } from 'react'
-import { db } from '../../firebase/firebase'
-import { addDoc , collection , serverTimestamp } from 'firebase/firestore'
-import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { addProduct } from '../../services/productService';
 import { auth } from '../../firebase/firebase';
 
 const SellProduct = () => {
     const [ product , setProduct ] = useState({
-        title: "",
+        name: "",
         description: "",
         price: "",
         category: "",
         location: "",
         userId:"",
         userName:"",
-        imageUrl: ""
+        image: ""
     })
 
     const [imageFile, setImageFile] = useState<File | null>(null);
@@ -29,58 +27,64 @@ const SellProduct = () => {
         }
     }
 
-    const handleSubmit = async(e: React.FormEvent) => {
-        e.preventDefault()
-        setUploading(true)
-        try {
-            const user = auth.currentUser;
-            if (!user) {
-                alert("You must be logged in to sell a product!");
-                return;
-            }
+    
 
-            let imageUrl = "";
+    const handleSubmit = async (e: React.FormEvent) => {
+      e.preventDefault();
+      setUploading(true);
+  
+      try {
+          const user = auth.currentUser;
+          if (!user) {
+              alert("You must be logged in to sell a product!");
+              setUploading(false);
+              return;
+          }
+  
+          // ✅ Convert productData to FormData
+          const formData = new FormData();
+          formData.append("name", product.name);
+          formData.append("description", product.description);
+          formData.append("price", product.price.toString());
+          formData.append("category", product.category);
+          formData.append("location", product.location);
+          formData.append("userName", user.displayName || "");
+          if (imageFile) formData.append("image", imageFile); // Append file
+  
+          // ✅ Use `formData` instead of `productData`
+          const response = await addProduct(formData);
+  
+          if (response && response.success) {
+              alert("Product added successfully!");
+              setProduct({
+                  name: "",
+                  description: "",
+                  price: "",
+                  category: "",
+                  location: "",
+                  userId: "",
+                  userName: "",
+                  image: "",
+              });
+              setImageFile(null);
+          } else {
+              alert("Failed to add product!");
+          }
+      } catch (error) {
+          console.error(error);
+          alert("Error adding product");
+      } finally {
+          setUploading(false);
+      }
+  };
+  
 
-            if(imageFile) {
-                const storage = getStorage()
-                const storageRef = ref(storage , `products/${imageFile.name}`)
-                const uploadTask = uploadBytesResumable(storageRef , imageFile)
-                await new Promise<void>((res, rej) => {
-                    uploadTask.on(
-                      'state_changed',
-                      null, 
-                      (error) => rej(error),  
-                      async () => { 
-                        imageUrl = await getDownloadURL(uploadTask.snapshot.ref);
-                        res();
-                      }
-                    );
-                  });
-                  
-            }
-
-            await addDoc(collection(db , "products") , {
-                ...product ,
-                price: Number(product.price),
-                imageUrl,
-                userId:user.uid,
-                userName:user.displayName,
-                createdAt: serverTimestamp()
-            })
-
-            alert('product added successfully')
-            setUploading(false)
-        } catch (error) {
-            console.log(error)
-            alert(error)
-        }
-    }
   return (
     <div>
       <div className='max-w-lg mx-auto bg-white p-6 shadow-md rounded-lg mt-10'>
         <h2 className='text-2xl font-semibold mb-4'>Sell Your Product</h2>
         <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
-            <input type="text" name='title' placeholder='Title' value={product.title} onChange={handleChange} className='border p-2 rounded-md' required />
+            <input type="text" name='name' placeholder='Title' value={product.name} onChange={handleChange} className='border p-2 rounded-md' required />
             <textarea name="description" placeholder='Description' value={product.description} onChange={handleChange} className='border p-2 rounded-md' required />
             <input type="number" name='price' placeholder='Price' value={product.price} onChange={handleChange} className='border p-2 rounded-md' required />
             <input type="text" name='category' placeholder='Category' value={product.category} onChange={handleChange} className='border p-2 rounded-md' required />

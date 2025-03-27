@@ -7,7 +7,18 @@ export const fetchProducts = async() => {
     return data;
 }
 
-export const addProduct = async(product:any) => {
-    const { data } = await axios.post(API_URL , product)
-    return data 
-}
+export const addProduct = async (productData: FormData) => {
+    try {
+        const response = await axios.post(API_URL, productData, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        });
+        console.log("Response from server:", response.data);
+        return response.data;
+    } catch (error) {
+        console.error("Error in addProduct:", error);
+        return { success: false };
+    }
+};
+

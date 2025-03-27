@@ -1,53 +1,55 @@
 import React, { useEffect, useState } from 'react'
 import Navbar from '../Navbar/Navbar'
 import MenuBar from '../MenuBar/MenuBar'
-import { collection , getDocs } from 'firebase/firestore'
-import { db } from '../../firebase/firebase';
+import { fetchProducts } from '../../services/productService'
+import { useNavigate } from "react-router-dom";
+import { useProduct } from "../Details/ProductContext";
+import Footer from '../Footer/Footer';
 
 interface Product {
-  id:string;
-  title:string;
+  name: string;
   description:string;
   price:number;
   category:string;
-  location:string;
-  imageUrl:string;
+  location: string;
   userId:string;
-  userName:string
+  userName:string;
+  image: string;
 }
   
 
 const Home = () => {
 
   const [products , setProducts] = useState<Product[]>([]);
-
+  const { setSelectedProduct } = useProduct();
+  const navigate = useNavigate();
   useEffect(() => {
-    const fetchProducts = async() => {
-      const querySnapshot = await getDocs(collection(db, "products"));
-      const productArray = querySnapshot.docs.map(doc => ({id:doc.id , ...doc.data()})) as Product[]
-      setProducts(productArray)
-    };
-    fetchProducts();
-  } ,[])
+    fetchProducts().then(setProducts)
+  },[])
+  
+  const handleProductClick = (product: Product) => {
+    setSelectedProduct(product);
+    navigate("/details"); 
+  };
+
   return (
     <div>
       <Navbar/>
       <MenuBar/>
       <div className="max-w-6xl mx-auto mt-10">
-      <h2 className="text-2xl font-semibold mb-4">Latest Products</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        {products.map(product => (
-          <div key={product.id} className="bg-white p-4 shadow-md rounded-lg">
-            <img src={product.imageUrl} alt={product.title} className="w-full h-40 object-cover rounded-md mb-4" />
-            <h3 className="text-lg font-semibold">{product.title}</h3>
-            <h3 className="text-lg font-semibold">{product.userName}</h3>
-            <p className="text-gray-600 text-sm">{product.description}</p>
-            <p className="text-lg font-bold mt-2">₹{product.price}</p>
-            <p className="text-sm text-gray-500">{product.category} • {product.location}</p>
-          </div>
-        ))}
+        <h2 className="text-2xl font-semibold mb-4">Latest Products</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+          {products.map(product => (
+            <div key={product.name} onClick={() => handleProductClick(product)} className="bg-white p-4 border border-spacing-1 shadow-md rounded-lg">
+              <img src={`http://localhost:3000/${product.image}`} alt={product.name} className="w-full h-40 object-cover rounded-sm mb-4" />
+              <p className="text-lg font-bold mt-2">₹{product.price}</p>
+              <h3 className="text-lg font-semibold">{product.name}</h3>
+              <p className="text-sm text-gray-500">{product.category} • {product.location}</p>
+            </div>
+          ))}
+        </div>
       </div>
-    </div>
+      <Footer/>
     </div>
   )
 }
